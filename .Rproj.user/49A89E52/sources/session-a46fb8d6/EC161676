@@ -1,0 +1,26 @@
+{
+    "id": "EC161676",
+    "path": "~/src/bayesian-course-s26/problem_sets/basic_regression_in_STAN.R",
+    "project_path": "problem_sets/basic_regression_in_STAN.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1768438553598.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "6,20",
+        "scrollLine": "4"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1768442725,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1768442725107,
+    "read_only": false,
+    "read_only_alternatives": []
+}
