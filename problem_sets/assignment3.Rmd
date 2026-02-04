@@ -1,0 +1,141 @@
+---
+title: "Assignment 3"
+author: "Madeline Berger"
+date: "2026-01-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rethinking)
+
+```
+
+
+```{r samples}
+
+
+p_grid <- seq(from = 0, to = 1, length.out = 1000) # a grid of probablities
+
+prior <- rep(1,1000)
+likelihood <- dbinom(6, size = 9, prob = p_grid)
+posterior <- likelihood * prior
+posterior <- likelihood / sum(posterior)
+
+
+set.seed(100)
+
+samples <- sample(p_grid, prob = posterior, size = 1e4, replace = TRUE) # draw samples from the posterior
+
+#hist(posterior)
+
+plot(posterior ~ p_grid, type = "l")
+
+```
+
+
+#### 3E1: How much posterior lies below *p* = 0.2?
+
+```{r}
+
+# first attempt: 
+
+#le_0.2 <- length(posterior[posterior < 0.2]) # all of it? not right
+
+# second attempt
+#sum(samples[samples < 0.2]) 
+
+sum(samples < 0.2)
+
+sum(samples < 0.2) / 1e4
+
+```
+ 
+**Answer:** Only 4 samples have a value of less than 0.2, meaning 4 x 10-4 of the posterior lies below 0.2
+
+Note to self: you are using samples here (why?) and you are computing how many out of 1000 are less than 0.2
+
+
+#### 3E4: 20% of the posterior probability lies below which value of *p*?
+
+```{r}
+
+# also: at what p is the 20% "line" 
+quantile(samples, 0.2)
+
+
+
+```
+**Answer:** 20% of the posterior probability lies below *p* = 0.518
+
+#### 3E6: Which of the values of *p* contain 66% of the posterior probability, assuming equal posterior probability both below and above the interval?
+
+```{r}
+
+# this is what the HPDI is for
+
+HPDI(samples, prob = 0.66)
+
+
+```
+
+**Answer:** 66% of the posterior probability lies between (rounded) p = 0.51 and p = 0.77.
+
+
+
+#### 3M1: Suppose the globe tossing data had turned out to be 8 water in 15 tosses. Construct the posterior distribution, using grid approximation. Use the same flat prior as before.
+
+```{r posterior}
+
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 1000) 
+
+# define prior - not sure I did this right
+prior <- rep(1,1000)
+
+#compute likelihood
+likelihood <- dbinom(8, size = 15, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardize Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+#hist(posterior)
+
+#simplehist(posterior) # this is not working for me idk why
+
+plot(posterior ~ p_grid, type = "l")
+
+```
+
+### 3M2. Draw 10,000 samples from the grid approximation from above. Then use the samples to calculate the 90% HPDI for p.
+
+```{r hpdi}
+
+samples <- sample(p_grid, prob = posterior, size = 10000, replace = T)
+HPDI(samples, prob = 0.9)
+```
+
+
+#### 3M3. Construct a posterior predictive check for this model and data. This means simulate the distribution of samples, averaging over the posterior uncertainty in p. What is the probability of observing 8 water in 15 tosses?
+
+Note: Asking for probability of 8 is essentially saying: how often do we see 8, in proportion to all samples?
+```{r probability}
+
+set.seed(100) # so its the same answer everytime
+
+w <- rbinom(1000, size = 15, prob =  samples)
+
+hist(w)
+
+sum (w == 8) / length(w)
+
+
+```
+
+**Answer:**The probability of observing 8 water in 15 tosses is 0.163.

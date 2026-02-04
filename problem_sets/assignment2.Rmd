@@ -1,0 +1,221 @@
+---
+title: 'Assignment 2: 2M1 and 2M2'
+author: "Madeline Berger"
+date: "2026-01-26"
+output:
+  pdf_document: default
+  html_document: default
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+
+
+```
+
+## 2M1. Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for *each of the following sets of observations*. In each case, assume a uniform prior for p.
+
+(1) W, W, W
+(2) W, W, W, L
+(3) L, W, W, L, W, W, W
+
+Steps to grid approximation:
+
+-   define the grid, i.e. how many points to use in estimating the
+    posterior, and make a list of the parameter values in the grid
+
+-   compute the value of the prior at each parameter value in the grid
+
+-   compute the likelihood at each parameter value
+
+-    compute the standardized posterior at each parameter value, by
+    multiplying the prior by the likelihood
+
+-   finally standardize the posterior by dividing each value by the sum
+    of all values
+
+**W, W, W**
+
+```{r}
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 20) # this can be any number, but sufficiently large to get a reasonable approximation of posterior 
+# values of parameter p for which we want to assign a posterior to 
+# for each value of p, what is the probability of that parameer given the data under the binomial distribution 
+
+
+# define prior. uniform prior. 
+prior <- rep(1,20) # multiply anything by itself, gives no information. it could be something else, but that might give you more information
+
+#compute likelihood - density of binomial distribution.
+likelihood <- dbinom(3, size = 3, prob = p_grid) # this is where the length of data and the results WWW come in. 3 W in 3 trials
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardixe Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+
+plot( p_grid , posterior , type="b" ,
+xlab="probability of water" , ylab="posterior probability" )
+mtext( "Probability of Water, given WWW" )
+```
+
+**W, W, W, L**
+
+```{r}
+
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 20) # 4 observations
+
+# define prior 
+prior <- rep(1,20)
+
+#compute likelihood
+likelihood <- dbinom(3, size = 4, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardixe Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+
+plot( p_grid , posterior , type="b" ,
+xlab="probability of water" , ylab="posterior probability" )
+mtext( "4 points - W W W L" )
+
+
+
+
+```
+
+**L, W, W, L, W, W, W**
+
+```{r}
+
+
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 20) # 7 observations
+
+# define prior - not sure I did this right
+prior <- rep(1,20)
+
+#compute likelihood
+likelihood <- dbinom(4, size = 7, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardixe Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+
+plot( p_grid , posterior , type="b" ,
+xlab="probability of water" , ylab="posterior probability" )
+mtext( "7 points - L, W, W, L, W, W, W" )
+
+
+
+```
+
+## 2M2. Now assume a prior for p that is equal to zero when p \< 0.5 and is a positive constant when p ≥0.5. Again compute and plot the grid approximate posterior distribution for each of the sets of observations in the problem just above.
+
+**W, W, W**
+
+```{r}
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 20) 
+
+# define new prior 
+prior <- ifelse(p_grid < 0.5, 0, 1)
+
+#compute likelihood
+likelihood <- dbinom(3, size = 3, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardixe Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+
+plot( p_grid , posterior , type="b" ,
+xlab="probability of water" , ylab="posterior probability" )
+mtext( "3 points - WWW - new Prior " )
+```
+
+**W, W, W, L**
+
+```{r}
+
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 20) # 4 observations
+
+# define prior 
+prior <- ifelse(p_grid < 0.5, 0, 1)
+
+#compute likelihood
+likelihood <- dbinom(3, size = 4, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardixe Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+
+plot( p_grid , posterior , type="b" ,
+xlab="probability of water" , ylab="posterior probability" )
+mtext( "4 points - W W W L - New prior" )
+
+
+
+
+```
+
+**L, W, W, L, W, W, W**
+
+```{r}
+
+
+# define the grid, uniform prior for p
+
+p_grid <- seq(from = 0, to = 1, length.out = 20) # 7 observations
+
+# define prior - not sure I did this right
+prior <- ifelse(p_grid < 0.5, 0, 1)
+
+#compute likelihood
+likelihood <- dbinom(4, size = 7, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior <- likelihood * prior
+
+# standardixe Posterior 
+
+posterior <- unstd.posterior / sum(unstd.posterior)
+
+
+plot( p_grid , posterior , type="b" ,
+xlab="probability of water" , ylab="posterior probability" )
+mtext( "7 points - L, W, W, L, W, W, W - New prior" )
+
+
+
+```

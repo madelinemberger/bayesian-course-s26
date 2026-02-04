@@ -1,0 +1,337 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Assignment 2: 2M1 and 2M2},
+  pdfauthor={Madeline Berger},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Assignment 2: 2M1 and 2M2}
+\author{Madeline Berger}
+\date{2026-01-26}
+
+\begin{document}
+\maketitle
+
+\subsection{\texorpdfstring{2M1. Recall the globe tossing model from the
+chapter. Compute and plot the grid approximate posterior distribution
+for \emph{each of the following sets of observations}. In each case,
+assume a uniform prior for
+p.}{2M1. Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for p.}}\label{m1.-recall-the-globe-tossing-model-from-the-chapter.-compute-and-plot-the-grid-approximate-posterior-distribution-for-each-of-the-following-sets-of-observations.-in-each-case-assume-a-uniform-prior-for-p.}
+
+\begin{enumerate}
+\def\labelenumi{(\arabic{enumi})}
+\tightlist
+\item
+  W, W, W
+\item
+  W, W, W, L
+\item
+  L, W, W, L, W, W, W
+\end{enumerate}
+
+Steps to grid approximation:
+
+\begin{itemize}
+\item
+  define the grid, i.e.~how many points to use in estimating the
+  posterior, and make a list of the parameter values in the grid
+\item
+  compute the value of the prior at each parameter value in the grid
+\item
+  compute the likelihood at each parameter value
+\item
+  compute the standardized posterior at each parameter value, by
+  multiplying the prior by the likelihood
+\item
+  finally standardize the posterior by dividing each value by the sum of
+  all values
+\end{itemize}
+
+\textbf{W, W, W}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# define the grid, uniform prior for p}
+
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{0}\NormalTok{, }\AttributeTok{to =} \DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{3}\NormalTok{) }\CommentTok{\# start with 3 observations}
+
+\CommentTok{\# define prior }
+\NormalTok{prior }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{)}
+
+\CommentTok{\#compute likelihood}
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{3}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p\_grid)}
+
+\CommentTok{\# compute product of likelihood and prior}
+\NormalTok{unstd.posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{*}\NormalTok{ prior}
+
+\CommentTok{\# standardixe Posterior }
+
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ unstd.posterior }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(unstd.posterior)}
+
+
+\FunctionTok{plot}\NormalTok{( p\_grid , posterior , }\AttributeTok{type=}\StringTok{"b"}\NormalTok{ ,}
+\AttributeTok{xlab=}\StringTok{"probability of water"}\NormalTok{ , }\AttributeTok{ylab=}\StringTok{"posterior probability"}\NormalTok{ )}
+\FunctionTok{mtext}\NormalTok{( }\StringTok{"3 points {-} WWW"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{assignment2_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+\textbf{W, W, W, L}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# define the grid, uniform prior for p}
+
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{0}\NormalTok{, }\AttributeTok{to =} \DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{4}\NormalTok{) }\CommentTok{\# 4 observations}
+
+\CommentTok{\# define prior }
+\NormalTok{prior }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{),}\DecValTok{0}\NormalTok{)}
+
+\CommentTok{\#compute likelihood}
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{3}\NormalTok{, }\AttributeTok{size =} \DecValTok{4}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p\_grid)}
+
+\CommentTok{\# compute product of likelihood and prior}
+\NormalTok{unstd.posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{*}\NormalTok{ prior}
+
+\CommentTok{\# standardixe Posterior }
+
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ unstd.posterior }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(unstd.posterior)}
+
+
+\FunctionTok{plot}\NormalTok{( p\_grid , posterior , }\AttributeTok{type=}\StringTok{"b"}\NormalTok{ ,}
+\AttributeTok{xlab=}\StringTok{"probability of water"}\NormalTok{ , }\AttributeTok{ylab=}\StringTok{"posterior probability"}\NormalTok{ )}
+\FunctionTok{mtext}\NormalTok{( }\StringTok{"4 points {-} W W W L"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{assignment2_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\textbf{L, W, W, L, W, W, W}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# define the grid, uniform prior for p}
+
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{0}\NormalTok{, }\AttributeTok{to =} \DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{7}\NormalTok{) }\CommentTok{\# 7 observations}
+
+\CommentTok{\# define prior {-} not sure I did this right}
+\NormalTok{prior }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\FunctionTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{),}\DecValTok{0}\NormalTok{,}\FunctionTok{rep}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+
+\CommentTok{\#compute likelihood}
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{4}\NormalTok{, }\AttributeTok{size =} \DecValTok{7}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p\_grid)}
+
+\CommentTok{\# compute product of likelihood and prior}
+\NormalTok{unstd.posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{*}\NormalTok{ prior}
+
+\CommentTok{\# standardixe Posterior }
+
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ unstd.posterior }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(unstd.posterior)}
+
+
+\FunctionTok{plot}\NormalTok{( p\_grid , posterior , }\AttributeTok{type=}\StringTok{"b"}\NormalTok{ ,}
+\AttributeTok{xlab=}\StringTok{"probability of water"}\NormalTok{ , }\AttributeTok{ylab=}\StringTok{"posterior probability"}\NormalTok{ )}
+\FunctionTok{mtext}\NormalTok{( }\StringTok{"7 points {-} L, W, W, L, W, W, W"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{assignment2_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\subsection{2M2. Now assume a prior for p that is equal to zero when p
+\textless{} 0.5 and is a positive constant when p ≥0.5. Again compute
+and plot the grid approximate posterior distribution for each of the
+sets of observations in the problem just
+above.}\label{m2.-now-assume-a-prior-for-p-that-is-equal-to-zero-when-p-0.5-and-is-a-positive-constant-when-p-0.5.-again-compute-and-plot-the-grid-approximate-posterior-distribution-for-each-of-the-sets-of-observations-in-the-problem-just-above.}
+
+\textbf{W, W, W}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# define the grid, uniform prior for p}
+
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{0}\NormalTok{, }\AttributeTok{to =} \DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{3}\NormalTok{) }
+
+\CommentTok{\# define new prior }
+\NormalTok{prior }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(p\_grid }\SpecialCharTok{\textless{}} \FloatTok{0.5}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+
+\CommentTok{\#compute likelihood}
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{3}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p\_grid)}
+
+\CommentTok{\# compute product of likelihood and prior}
+\NormalTok{unstd.posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{*}\NormalTok{ prior}
+
+\CommentTok{\# standardixe Posterior }
+
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ unstd.posterior }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(unstd.posterior)}
+
+
+\FunctionTok{plot}\NormalTok{( p\_grid , posterior , }\AttributeTok{type=}\StringTok{"b"}\NormalTok{ ,}
+\AttributeTok{xlab=}\StringTok{"probability of water"}\NormalTok{ , }\AttributeTok{ylab=}\StringTok{"posterior probability"}\NormalTok{ )}
+\FunctionTok{mtext}\NormalTok{( }\StringTok{"3 points {-} WWW {-} new Prior "}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{assignment2_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\textbf{W, W, W, L}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# define the grid, uniform prior for p}
+
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{0}\NormalTok{, }\AttributeTok{to =} \DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{4}\NormalTok{) }\CommentTok{\# 4 observations}
+
+\CommentTok{\# define prior }
+\NormalTok{prior }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(p\_grid }\SpecialCharTok{\textless{}} \FloatTok{0.5}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+
+\CommentTok{\#compute likelihood}
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{3}\NormalTok{, }\AttributeTok{size =} \DecValTok{4}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p\_grid)}
+
+\CommentTok{\# compute product of likelihood and prior}
+\NormalTok{unstd.posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{*}\NormalTok{ prior}
+
+\CommentTok{\# standardixe Posterior }
+
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ unstd.posterior }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(unstd.posterior)}
+
+
+\FunctionTok{plot}\NormalTok{( p\_grid , posterior , }\AttributeTok{type=}\StringTok{"b"}\NormalTok{ ,}
+\AttributeTok{xlab=}\StringTok{"probability of water"}\NormalTok{ , }\AttributeTok{ylab=}\StringTok{"posterior probability"}\NormalTok{ )}
+\FunctionTok{mtext}\NormalTok{( }\StringTok{"4 points {-} W W W L {-} New prior"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{assignment2_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\textbf{L, W, W, L, W, W, W}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# define the grid, uniform prior for p}
+
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{0}\NormalTok{, }\AttributeTok{to =} \DecValTok{1}\NormalTok{, }\AttributeTok{length.out =} \DecValTok{7}\NormalTok{) }\CommentTok{\# 7 observations}
+
+\CommentTok{\# define prior {-} not sure I did this right}
+\NormalTok{prior }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(p\_grid }\SpecialCharTok{\textless{}} \FloatTok{0.5}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+
+\CommentTok{\#compute likelihood}
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{4}\NormalTok{, }\AttributeTok{size =} \DecValTok{7}\NormalTok{, }\AttributeTok{prob =}\NormalTok{ p\_grid)}
+
+\CommentTok{\# compute product of likelihood and prior}
+\NormalTok{unstd.posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{*}\NormalTok{ prior}
+
+\CommentTok{\# standardixe Posterior }
+
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ unstd.posterior }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(unstd.posterior)}
+
+
+\FunctionTok{plot}\NormalTok{( p\_grid , posterior , }\AttributeTok{type=}\StringTok{"b"}\NormalTok{ ,}
+\AttributeTok{xlab=}\StringTok{"probability of water"}\NormalTok{ , }\AttributeTok{ylab=}\StringTok{"posterior probability"}\NormalTok{ )}
+\FunctionTok{mtext}\NormalTok{( }\StringTok{"7 points {-} L, W, W, L, W, W, W {-} New prior"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{assignment2_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\end{document}
