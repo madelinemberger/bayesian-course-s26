@@ -1,0 +1,50 @@
+---
+title: "Lecture Code Notes"
+author: "Maddie"
+date: "2026-02-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# remember to load stan in r package?
+
+library()
+
+```
+
+# Lecture 6 - 7
+## Globe Tossing Model in Stan
+- three chunks (sometimes 4)
+- for `data` we need to define what kind, ie "int" for integer
+- for `parameter` we also need to tell it what its storing, ie real for real number (can be a decimal), and define parameter space
+- semi colon ends each line
+- slashes are comments
+- `model` needs to have likelihood and prior
+
+```{r}
+
+# this is writing a file out with all this stuff in it!
+write("// Stan Model for Globe toss
+
+data {
+int < lower = 0 > N; // number of tosses,
+int < lower = 0, upper = N > W;// times we land on water
+}
+
+parameters{
+real < lower = 0, upper = 1 > p; // probability of water
+}
+
+model {
+p ~ uniform(0,1); //prior
+W ~ binomial(N,p); // likelihood
+}
+",
+
+"stan_globe_toss.stan")
+
+stanc("stan_globe_toss.stan") # compile Stan code in C++
+```
+
