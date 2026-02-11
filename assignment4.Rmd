@@ -1,0 +1,113 @@
+---
+title: "Assignment 4"
+author: "Madeline Berger"
+date: "2026-02-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE)
+
+library(rstan)
+options(mc.cores = parallel::detectCores()) # set up to estimate your model in parallel
+rstan_options(auto_write = TRUE) # automatically save a bare version of a compiled Stan program to the hard disk so that it does not need to be recompiled
+
+library(bayesplot)
+library(dplyr)
+library(ggplot2)
+library(tidybayes)
+
+
+```
+
+
+## Assignment 4
+Using the R code provide in class, play around with editing (increasing/decreasing, by a little, by a lot) the following and note how it effects (a) diagnostics for the HMC algorithm and (b) the shape of the resulting posterior of p. 
+
+1) the number of chains (also change number of cores to match)
+2) the number of iterations
+3) the sample size of the data
+Hint: visualizing the posterior might be a good way to compare the results
+
+
+```{r regression}
+
+# initialization ----------------------------------------------------------
+
+library(rstan)
+options(mc.cores = parallel::detectCores()) # set up to estimate your model in parallel
+rstan_options(auto_write = TRUE) # automatically save a bare version of a compiled Stan program to the hard disk so that it does not need to be recompiled
+
+library(rethinking)
+
+# Define model ------------------------------------------------------------
+
+write("// Stan model for globe toss
+
+data {
+ int < lower = 0 > N; // number of tosses
+ int < lower = 0, upper = N > W; // times we land on water
+}
+
+parameters {
+  real < lower = 0, upper = 1 > p; // probability of water
+}
+
+model {
+  p ~ uniform(0,1); // prior
+  W ~ binomial(N,p); // likelihood
+}
+
+",
+
+"stan_globe_toss.stan")
+
+stanc("stan_globe_toss.stan") # compile Stan code in C++
+
+
+```
+
+## Data
+
+```{r}
+
+# data --------------------------------------------------------------------
+
+# stan_data <- list(N = 10, W = 6)
+# 
+N = 10 # number of trails
+water <- rbinom(N, 1, prob=0.6)
+water
+
+stan_data <- list(N=N, W=sum(water))
+# 
+# fit model ---------------------------------------------------------------
+
+fit <- rstan::stan(file="stan_globe_toss.stan", data=stan_data, 
+                   chains=4, cores=4, iter = 1000,
+                   warmup = 500)
+fit
+
+# diagnostics -------------------------------------------------------------
+
+mcmc_trace(fit, pars="p")
+
+
+# posterior visuals and summaries -----------------------------------------
+
+fit %>% spread_draws(p) #extract posterior samples for p into a tibble
+
+fit %>%
+  spread_draws(p) %>%
+  ggplot(aes(x = p)) +
+  stat_halfeye()
+
+fit %>% 
+  spread_draws(p) %>% 
+  median_qi()
+
+```
+
+
+
