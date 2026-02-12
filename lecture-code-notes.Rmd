@@ -10,9 +10,115 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # remember to load stan in r package?
 
-library()
 
 ```
+
+# Lecture 8 
+
+```{r}
+
+library(rethinking) # not working?
+library(rstan)
+
+```
+## Use rethinking for exploratory and prior predictive check
+
+[insert code when library loads]
+
+## Write height model in STAN
+
+In English: "What is the mean height of adults in Dobe that are members of the !kung san?"
+
+```{r}
+
+
+write("//
+      data{
+      int < lower = 1 > N; // sample size
+      vector[N] y; // response
+      }
+      
+      parameters{
+      real mu; 
+      real < lower = 0 > sigma; // we know sigma wont be zero, and 50 is huge
+      }
+      
+      model{
+      y ~ normal(mu,sigma);
+      mu ~ normal(178,20);
+      sigma ~ uniform(0,50);
+      }
+      
+      ")
+
+
+```
+
+Adding in weight:
+
+Prior predictive check
+```{r}
+
+set.seed(100)
+N <- 100 # 100 lines in plot of a and b
+a <- rnorm(N, 178, 20)
+b <- rnorm(N, 0, 10)
+# can also try other distribution priors:
+b <- rlnorm(N, 0, 1) # <- see plot is much more informative, maybe too informative.
+
+# plot
+
+
+```
+
+Fit model using stan:
+```{r}
+
+write("//
+      data{
+      int < lower = 1 > N; // sample size
+      vector[N] y; // response
+      vector[N] x; // predictor
+      }
+      
+      parameters{
+      real alpha; 
+      real < lower = 0 > beta; // slope
+      real < lower = 0, upper = 50 > sigma; // error
+      }
+      
+      model{
+      vector[N] mu; // mu no longer a parameter
+      mu = + beta*x; 
+      y ~ normal(mu,sigma);
+      alpha ~ normal(178,20);
+      beta ~ lognormal(0,1)
+      sigma ~ uniform(0,50);
+      }
+      generated quantities{
+      
+      }
+      
+      ",
+      "stan_m4.3.stan")
+
+stanc("stan_m4.3.stan") # compile
+
+# add data, fit model:
+
+d2$weight2 <- d2$weight - mean(d2$weight)
+stan_data <- list(N= nrow(d2), x = d2$weight2, y = d2$height)
+
+fit.m4.3 <- rstan::stan(file = "stan_m4.3.stan")
+
+# do diagnostics: r hat, traceplot
+
+
+# use tidybayes to make the plots
+
+
+```
+
 
 # Lecture 6 - 7
 ## Globe Tossing Model in Stan
