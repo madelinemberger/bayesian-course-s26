@@ -1,0 +1,153 @@
+---
+title: "Assignment 6"
+author: "Madeline Berger"
+date: "2026-02-27"
+output: html_document
+---
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rstan)
+options(mc.cores = parallel::detectCores()) # set up to estimate your model in parallel
+rstan_options(auto_write = TRUE) # automatically save a bare version of a compiled Stan program to the hard disk so that it does not need to be recompiled
+
+library(bayesplot)
+library(dplyr)
+library(ggplot2)
+library(tidybayes)
+
+```
+
+
+## 1. In your own words, explain the difference between the two intervals plotted in 4.10 and how you would go about creating each.
+
+The smaller interval is the variation of mu, the mean height at each individual weight, or the posterior distribution of u. The larger interval in light grey is the interval in which you would expect 89% of the population's height would fall for each weight. 
+
+
+## 2. Using the Howell1 data build a model for the difference in mean height by gender using both the dummy variable and index method. Compare your results.
+
+### Dummy Model
+
+```{r q2}
+
+# load the data
+library(rethinking)
+data("Howell1")
+
+d <- Howell1
+
+# ------ create variables ---------- #
+d$H <- d$height
+d$dum <- d$male
+d$index <- ifelse(d$male == 1,1,2)
+
+# mq.2 dummy  ------------------------------------------------------------
+
+write("// 
+
+data {
+ int < lower = 1 > N; // sample size
+ vector[N] H; // response
+ vector[N] dum; // predictor
+}
+
+parameters {
+  real a; // intercept
+  real bM; // slope
+  real sigma; // error
+}
+
+model {
+  vector[N] mu;
+  mu = a + bM*dum;
+  H ~ normal(mu, sigma);
+  a ~ normal(179,20);
+  bM ~ normal(0,10);
+  sigma ~ uniform(0,50);
+}
+
+generated quantities {
+
+// prior predictive check;
+  real a_sim = normal_rng(178, 20);
+  real b_sim = normal_rng(0, 10);
+  real sigma_sim = uniform_rng(0,20);
+  real y_sim[N] = normal_rng(a_sim + b_sim * dum, sigma_sim);  // Simulate from prior
+
+// posterior predictive check;
+  vector[N] y_hat;
+  for (i in 1:N) {
+    y_hat[i] = normal_rng(a + bM * dum[i], sigma); // Simulated data
+  }
+}
+
+
+",
+
+"stan_q.1_dum.stan")
+
+stanc("stan_q.1_dum.stan")
+
+# fit the model 
+
+stan_data <- list(N = nrow(d), dum = d$dum, H = d$H)
+
+fit.dum <- rstan::stan(file="stan_q.1_dum.stan", data=stan_data, chains=3, iter=1000)
+fit.dum
+
+
+```
+
+### Dummy Model Prior Checks, Diagnostics and Plots
+
+```{r}
+
+# Prior check - join estimation
+
+prior_sim <- fit.dum %>% 
+  spread_draws(y_sim[i])
+
+nrow(prior_sim) # 1500 iterations by 544 data points
+
+prior_sim %>% 
+  left_join(d %>% select(dum) %>% mutate(i = seq(1:544)),"i") %>% 
+  mutate(dum = as.integer(dum)) %>% 
+  ggplot() +
+  geom_point(aes(x=as.integer(dum),y=y_sim),
+             position = "jitter", alpha = 0.5) +
+  xlab("Gender") +
+  ylab("Height")+
+  theme_bw()
+
+
+# diagnostics
+mcmc_trace(fit.dum, pars=c("a","bM","sigma"))
+
+# plot results
+fit.dum.sum <- fit.dum %>% 
+  spread_draws(a, bM) %>% 
+  median_qi()
+y_pred <- fit.dum.sum$a + fit.dum.sum$bM * d$dum
+
+plot(d$dum,d$H, col="skyblue", xlab="Gender", ylab="Height")
+points(d$dum,y_pred, type = "l")
+
+# get random rows from data?
+
+# # 1. Ensure reproducibility (optional, but recommended for consistent results)
+# set.seed(123) 
+# random_indices <- sample(nrow(d), size = 10)
+# x_grid<- d[random_indices, "dum"]
+# x_grid <- as.vector(x_grid)
+# 
+# draws_with_preds <- fit.dum %>%
+#   spread_draws(a, bM) %>% # sample from posterior, 1500
+#   cross_join(x_grid) %>%  # 10 samples from actual data
+#   mutate(mu_hat = a + bM * dum)
+
+```
+
