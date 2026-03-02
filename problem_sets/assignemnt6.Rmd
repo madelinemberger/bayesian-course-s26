@@ -5,11 +5,10 @@ date: "2026-02-27"
 output: html_document
 ---
 
-
-
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE
+                      )
 
 library(rstan)
 options(mc.cores = parallel::detectCores()) # set up to estimate your model in parallel
@@ -19,20 +18,7 @@ library(bayesplot)
 library(dplyr)
 library(ggplot2)
 library(tidybayes)
-
-```
-
-
-## 1. In your own words, explain the difference between the two intervals plotted in 4.10 and how you would go about creating each.
-
-The smaller interval is the variation of mu, the mean height at each individual weight, or the posterior distribution of u. The larger interval in light grey is the interval in which you would expect 89% of the population's height would fall for each weight. 
-
-
-## 2. Using the Howell1 data build a model for the difference in mean height by gender using both the dummy variable and index method. Compare your results.
-
-### Dummy Model
-
-```{r q2}
+library(posterior)
 
 # load the data
 library(rethinking)
@@ -40,10 +26,30 @@ data("Howell1")
 
 d <- Howell1
 
+if ("package:rethinking" %in% search()) detach("package:rethinking", unload = TRUE)
+
 # ------ create variables ---------- #
 d$H <- d$height
 d$dum <- d$male
-d$index <- ifelse(d$male == 1,1,2)
+d$index <- as.factor(ifelse(d$male == 1,1,2))
+
+```
+
+### Note to Mary: Everything runs fine until I try to knit, after which I was getting a weird error around the "spread_draws" function. I tried to get around it multiple ways but never found a solution. So apologies that this html does not have the graphs!  
+
+
+## 1. In your own words, explain the difference between the two intervals plotted in 4.10 and how you would go about creating each.
+
+The smaller interval is the variation of mu, the mean height at each individual weight, or the posterior distribution of u. The larger interval in light grey is the interval in which you would expect 89% of the population's height would fall for each weight.
+
+## 2. Using the Howell1 data build a model for the difference in mean height by gender using both the dummy variable and index method. Compare your results.
+
+### Dummy Model
+
+```{r q2, message=FALSE, warning=FALSE}
+
+
+
 
 # mq.2 dummy  ------------------------------------------------------------
 
@@ -108,7 +114,10 @@ fit.dum
 
 # Prior check - join estimation
 
-prior_sim <- fit.dum %>% 
+dum_draws_array <- as.array(fit.dum)
+
+prior_sim <- dum_draws_array %>% 
+  as_draws_df() %>% 
   spread_draws(y_sim[i])
 
 nrow(prior_sim) # 1500 iterations by 544 data points
@@ -117,8 +126,7 @@ prior_sim %>%
   left_join(d %>% select(dum) %>% mutate(i = seq(1:544)),"i") %>% 
   mutate(dum = as.integer(dum)) %>% 
   ggplot() +
-  geom_point(aes(x=as.integer(dum),y=y_sim),
-             position = "jitter", alpha = 0.5) +
+  geom_jitter(aes(x=dum,y=y_sim), alpha = 0.5, color = "skyblue", width = 0.05) +
   xlab("Gender") +
   ylab("Height")+
   theme_bw()
@@ -128,26 +136,187 @@ prior_sim %>%
 mcmc_trace(fit.dum, pars=c("a","bM","sigma"))
 
 # plot results
-fit.dum.sum <- fit.dum %>% 
+fit.dum.sum <- dum_draws_array %>% 
+  posterior::as_draws_df() %>% 
   spread_draws(a, bM) %>% 
   median_qi()
-y_pred <- fit.dum.sum$a + fit.dum.sum$bM * d$dum
+d$dum_num <- as.numeric(d$dum)
+y_pred <- fit.dum.sum$a+fit.dum.sum$bM*d$dum_num
 
 plot(d$dum,d$H, col="skyblue", xlab="Gender", ylab="Height")
 points(d$dum,y_pred, type = "l")
 
-# get random rows from data?
+# Create prediction grid
+x_grid <- data.frame(
+  dum = rep(c(0, 1), each = 5)
+)
 
-# # 1. Ensure reproducibility (optional, but recommended for consistent results)
-# set.seed(123) 
-# random_indices <- sample(nrow(d), size = 10)
-# x_grid<- d[random_indices, "dum"]
-# x_grid <- as.vector(x_grid)
-# 
-# draws_with_preds <- fit.dum %>%
-#   spread_draws(a, bM) %>% # sample from posterior, 1500
-#   cross_join(x_grid) %>%  # 10 samples from actual data
-#   mutate(mu_hat = a + bM * dum)
+# predict mu hat with data, posterior prediction
+draws_with_preds <- dum_draws_array %>%
+  posterior::as_draws_df() %>% 
+  spread_draws(a, bM) %>% # sample from posterior, 1500
+  cross_join(x_grid) %>%  # 10 samples from actual data
+  mutate(mu_hat = a + bM * dum)
+
+# get intervals from mu hat distributions
+pred_intervals <- draws_with_preds %>%
+  group_by(dum) %>%
+  median_qi(mu_hat, .width = c(.89, .95)) 
+  
+# plot data, mu_hat, and interval around mu_hat  
+ggplot(data = pred_intervals, aes(x = dum, y = mu_hat)) +
+  geom_jitter(data=d,
+              aes(x=dum,y=H),
+              color="skyblue",alpha=0.4, width = 0.05)+
+  geom_pointrange(aes(ymin = .lower, ymax = .upper),
+                  color = "coral", size = 0.3)+
+  theme_minimal()+
+  labs(x = "0 = Female 1 = Male",
+       y = "Height (cm)")
+
+
+# if we wanted to add prediction interval for y-hat, could probably add another geom_point range?
 
 ```
 
+### Index Model
+
+```{r}
+
+
+# mq.2 index  ------------------------------------------------------------
+
+write("// 
+
+data {
+ int < lower = 1 > N; // sample size
+ vector[N] H; // response
+ int < lower=1, upper=2> index[N]; // predictor
+}
+
+parameters {
+  vector[2] a; // two intercepts
+  real sigma; // error
+}
+
+model {
+  vector[N] mu;
+  mu = a[index];
+  H ~ normal(mu, sigma);
+  // priors
+  a ~ normal(178,20);
+  sigma ~ uniform(0,50);
+}
+
+generated quantities {
+  vector[2] a_sim;
+  real sigma_sim;
+  real y_sim[N];
+  
+// prior predictive check  
+  for (i in 1:2){
+   a_sim[i] = normal_rng(178,20);
+  }
+  sigma_sim = uniform_rng(0,50);
+  
+  for(n in 1:N){
+   y_sim[n] = normal_rng(a_sim[index[n]], sigma_sim);
+  }
+
+// posterior predictive check;
+  vector[N] y_hat;
+  for (n in 1:N) {
+    y_hat[n] = normal_rng(a[index[n]], sigma); // Simulated data
+  }
+}
+
+
+",
+
+"stan_q.1_index.stan")
+
+stanc("stan_q.1_index.stan")
+
+# fit the model 
+
+stan_data <- list(N = nrow(d), index = d$index, H = d$H)
+
+fit.index <- rstan::stan(file="stan_q.1_index.stan", data=stan_data, chains=3, iter=1000)
+fit.index
+
+
+
+```
+
+
+### Index Model Prior Checks, Diagnostics and Plots
+
+```{r}
+
+# Prior check - join estimation style
+
+index_draws_array <- as.array(fit.index)
+
+prior_sim <- index_draws_array %>% 
+  posterior::as_draws_df() %>% 
+  spread_draws(y_sim[i])
+
+nrow(prior_sim) # 1500 iterations by 544 data points
+
+prior_sim %>% 
+  left_join(d %>% select(index) %>% mutate(i = seq(1:544)),"i") %>% 
+  mutate(dum = as.integer(index)) %>% 
+  ggplot() +
+  geom_jitter(aes(x=index,y=y_sim),
+             alpha = 0.5, width = 0.05, color = "aquamarine3") +
+  xlab("Gender") +
+  ylab("Height")+
+  theme_bw() # prior y_sim range seems a bit wide but thats ok for now? 
+
+# what params did it sample?
+list_of_draws <- extract(fit.index)
+print(names(list_of_draws))
+
+# diagnostics
+mcmc_trace(fit.index, pars = c("a[1]","a[2]", "sigma")) # not looking too good?
+
+# plot results
+fit.index.sum <- index_draws_array %>%
+  posterior::as_draws_df() %>% 
+  spread_draws(a[i],sigma) %>% 
+  median_qi()
+d$index_num <- as.numeric(d$index)
+y_pred1 <- fit.index.sum$a[1] * d$index_num
+y_pred2 <- fit.index.sum$a[2] * d$index_num # not sure this is right
+
+plot(d$index,d$H, col="skyblue", xlab="Gender", ylab="Height")
+points(d$index,y_pred)
+points(d$index,y_pred)
+
+
+# draw parameters and create mu hat predictions. adding x values based on index here instead of using cross join because you would never multiple a 2 by alpha[1], I think
+draws_with_preds <- index_draws_array %>%
+  posterior::as_draws_df() %>% 
+  spread_draws(a[i], sigma) %>% # sample from posterior, 1500 x 2 different versions of a
+  mutate(index = ifelse(i == 1, 1,2)) %>% 
+  mutate(mu_hat = a*index)
+
+# get intervals from mu hat distributions
+pred_intervals <- draws_with_preds %>%
+  group_by(index) %>%
+  median_qi(mu_hat, .width = c(.89, .95)) 
+  
+# plot data, mu_hat, and interval around mu_hat  
+ggplot(data = pred_intervals, aes(x = index, y = mu_hat)) +
+  geom_jitter(data=d,
+              aes(x=index,y=H),
+              color="aquamarine3",alpha=0.4, width = 0.05)+
+  geom_pointrange(aes(ymin = .lower, ymax = .upper),
+                  color = "dodgerblue", size = 0.3)+
+  theme_minimal()+
+  labs(x = "1 = Male, 2 = Female",
+       y = "Height (cm)")
+
+```
+
+The final plot looks quite wrong but I'm not sure where I went wrong in the code. Maybe the priors? because the prior predictive plots look pretty wrong, like way too large a range for height. But I'm a bit unsure as to how the priors I specified produced such gigantic ranges. 
