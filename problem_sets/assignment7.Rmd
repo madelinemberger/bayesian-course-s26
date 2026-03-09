@@ -1,0 +1,163 @@
+---
+title: "Assignment 7"
+author: "Madeline Berger"
+date: "2026-03-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rstan)
+options(mc.cores = parallel::detectCores()) # set up to estimate your model in parallel
+rstan_options(auto_write = TRUE) # automatically save a bare version of a compiled Stan program to the hard disk so that it does not need to be recompiled
+
+library(bayesplot)
+library(dplyr)
+library(ggplot2)
+library(tidybayes)
+
+
+```
+ 
+
+50 fish were sampled and lengths were measured from 100 deep-set pelagic longlines, once in 1990 and again 2020. You want to know if there is difference in the average lengths.
+
+
+### 1. Simulate data for this experiment. Assume that fish length is 1.5 times
+smaller in 2020 than 1990.
+
+```{r sim}
+
+n <- 50
+mean_1990 <- 150 # cm
+mean_2020 <- 110 # cm
+sd_length <- 1
+
+# create data
+
+data <- data.frame(
+  old_new = c(rep("1_1990",n),rep("2_2020",n)),
+  length = c(
+    rnorm(n,mean_1990,sd_length),
+    rnorm(n,mean_2020,sd_length)
+  )
+)
+
+
+```
+
+
+
+### 2. Fit a Stan model for your question. Discuss how you chose your priors.
+Calculate the difference in means as a derived quantity.
+
+
+```{r stan}
+
+write("// Stan model for regression with categories
+
+data {
+ int < lower = 1 > N; // sample size
+ vector[N] y; // response
+ int x[N]; // predictor, year
+ int < lower = 1 > J; // number of categories
+}
+
+parameters {
+  vector[J] a; // slope(s)
+  real < lower = 0 > sigma; // error
+}
+
+model {
+  vector[N] mu;
+  mu = a[x];
+  y ~ normal(mu, sigma);
+  for(j in 1:J){
+    a[j] ~ normal(2,1);
+  }
+  sigma ~ exponential(1);
+}
+
+generated quantities {
+  // difference in means
+  real diff;
+  diff = a[1] - a[2]; // this is subtracted posteriors. this might be wrong
+
+  // prior predictive check;
+  vector[J] a_sim;
+  for(j in 1:J){
+    a_sim[j] = normal_rng(2,1);
+  }
+  real sigma_sim = exponential_rng(1);
+  real y_sim[N];
+  for(i in 1:N){
+    y_sim[i] = normal_rng(a_sim[x[i]], sigma_sim);  // Simulate from prior
+  }
+  
+  // posterior predictive check;
+  vector[N] y_hat;
+  for (i in 1:N) {
+    y_hat[i] = normal_rng(a[x[i]], sigma); // Simulated data
+  }
+
+} 
+",
+
+"stan_lm_cat.stan")
+
+stanc("stan_lm_cat.stan")
+
+data$X <- as.numeric(as.factor(data$old_new))
+stan_data <- list(N = nrow(data), J = length(unique(data$X)), x = data$X, y = data$length)
+
+fit_oldnew <- stan(file="stan_lm_cat.stan", data=stan_data)
+fit_oldnew
+
+```
+
+Model checks and derived quantities: 
+
+```{r results }
+
+# diagnostics 
+names(fit_oldnew)
+mcmc_trace(fit_oldnew, pars=c("a[1]","a[2]","sigma"))
+
+
+# summarize the derived difference in means
+
+diff_in_means <- fit_oldnew %>% 
+  spread_draws(diff) %>% 
+  median_qi(.width = 0.5) # so this is the 50% interval that contains the difference in slopes. it croses zero?
+
+
+
+```
+
+The mean of the distribution of the calculated difference in means is 0.2, but its 50% interval crosses zero, indicating that there may not be a discernable difference in means of fish length between 1990 and 2020 (according to this model and my simulated data).
+
+### 3. Plot the posterior density of the difference in the mean. How does your
+simulated data compare?
+
+```{r}
+
+# all means calculated from data
+
+diff_in_means_plot <- fit_oldnew %>% spread_draws(diff)
+
+
+# calculated from data
+
+data_diff <- mean(data$length[data$old_new=="1_1990" ]) - mean(data$length[data$old_new=="2_2020"])
+
+
+# plot
+ggplot(diff_in_means_plot, aes(x = diff)) +
+         geom_density() + 
+  theme_minimal()+
+  geom_vline(xintercept = data_diff)
+
+
+```
+
