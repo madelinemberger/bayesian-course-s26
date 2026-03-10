@@ -19,19 +19,16 @@ library(tidybayes)
 
 
 ```
- 
 
 50 fish were sampled and lengths were measured from 100 deep-set pelagic longlines, once in 1990 and again 2020. You want to know if there is difference in the average lengths.
 
-
-### 1. Simulate data for this experiment. Assume that fish length is 1.5 times
-smaller in 2020 than 1990.
+### 1. Simulate data for this experiment. Assume that fish length is 1.5 times smaller in 2020 than 1990.
 
 ```{r sim}
 
 n <- 50
 mean_1990 <- 150 # cm
-mean_2020 <- 110 # cm
+mean_2020 <- mean_1990 / 1.5 # cm
 sd_length <- 1
 
 # create data
@@ -47,11 +44,9 @@ data <- data.frame(
 
 ```
 
-
-
 ### 2. Fit a Stan model for your question. Discuss how you chose your priors.
-Calculate the difference in means as a derived quantity.
 
+Calculate the difference in means as a derived quantity.
 
 ```{r stan}
 
@@ -83,6 +78,7 @@ generated quantities {
   // difference in means
   real diff;
   diff = a[1] - a[2]; // this is subtracted posteriors. this might be wrong
+
 
   // prior predictive check;
   vector[J] a_sim;
@@ -116,7 +112,7 @@ fit_oldnew
 
 ```
 
-Model checks and derived quantities: 
+Model checks and derived quantities:
 
 ```{r results }
 
@@ -135,19 +131,18 @@ diff_in_means <- fit_oldnew %>%
 
 ```
 
-The mean of the distribution of the calculated difference in means is 0.2, but its 50% interval crosses zero, indicating that there may not be a discernable difference in means of fish length between 1990 and 2020 (according to this model and my simulated data).
+The mean of the distribution of the calculated difference in means is \~0.29, but its 50% interval crosses zero, indicating that there may not be a discernible difference in means of fish length between 1990 and 2020 (according to this model and my simulated data).
 
-### 3. Plot the posterior density of the difference in the mean. How does your
-simulated data compare?
+### 3. Plot the posterior density of the difference in the mean. How does your simulated data compare?
 
 ```{r}
 
-# all means calculated from data
+# all means calculated from model output
 
 diff_in_means_plot <- fit_oldnew %>% spread_draws(diff)
 
 
-# calculated from data
+# calculated from og data frame
 
 data_diff <- mean(data$length[data$old_new=="1_1990" ]) - mean(data$length[data$old_new=="2_2020"])
 
@@ -156,8 +151,9 @@ data_diff <- mean(data$length[data$old_new=="1_1990" ]) - mean(data$length[data$
 ggplot(diff_in_means_plot, aes(x = diff)) +
          geom_density() + 
   theme_minimal()+
-  geom_vline(xintercept = data_diff)
+  geom_vline(xintercept = data_diff, color = "red")
 
 
 ```
 
+Not sure I did this right but it seems the model is very far off from my simulated data means. Wondering if I should have fit a different distribution to the prior (I just used normal).

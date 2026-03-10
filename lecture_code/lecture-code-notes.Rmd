@@ -13,14 +13,80 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-# Lecture 8 
+
+## Lecture 14: Model checking
+
 
 ```{r}
 
-library(rethinking) # not working?
 library(rstan)
+library(tidyverse)
+
+sppnames <- c( "afarensis","africanus","habilis","boisei","rudolfensis","ergaster","sapiens")
+brainvolcc <- c( 438 , 452 , 612, 521, 752, 871, 1350 )
+masskg <- c( 37.0 , 35.5 , 34.5 , 41.5 , 55.5 , 61.0 , 53.5 )
+d <- data.frame( species=sppnames , brain=brainvolcc , mass=masskg )
+
+# normalization
+
+d$mass_std <- (d$mass - mean(d$mass))/sd(d$mass)
+d$brain_std <- d$brain / max(d$brain)
+
+
+# fit in stan 
+
+write("// Stan model for parametric equations
+
+data {
+ int < lower = 1 > N; // sample size
+ vector[N] Y; // response
+ vector[N] X; // predictor, year
+ vector[N] X_2; // predictor sq
+}
+
+parameters {
+  real a; // intercept
+  real bM; // slope
+  real bM2; // slope 2
+  real sigma; // error
+}
+
+model {
+  vector[N] mu;
+  mu = a + bM*X + bM2*X_2;
+  Y ~ normal(mu, sigma);
+  a ~ normal(0.5,1);
+  bM ~ normal(0,10);
+  bM2 ~ normal(0,10);
+  sigma ~ normal(0,1);
+}
+
+generated quantities {
+} 
+",
+
+"stan_ch7.2.stan")
+
+stanc("stan_ch7.2.stan")
+
+stan_data <- list(N = nrow(d), X=d$mass_std, Y=d$brain_std)
+
+fit.ch7.1 <- rstan::stan(file="stan_ch7.1.stan", data=stan_data, chains=3, iter=1000)
+fit.ch7.1
+
+d$X_2 <- (d$mass_std)^2
+stan_data2 <- list(N = nrow(d), X=d$mass_std, X_2=d$X_2, Y=d$brain_std)
+fit.ch7.2 <-  rstan::stan(file="stan_ch7.2.stan", data=stan_data2, chains=3, iter=1000)
+fit.ch7.2
+
+mcmc_trace(fit.ch7.2)
+
+df <- spread_draws(fit.ch7.2)
 
 ```
+
+
+
 ## Use rethinking for exploratory and prior predictive check
 
 [insert code when library loads]
